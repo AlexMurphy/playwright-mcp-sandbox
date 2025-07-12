@@ -2,3 +2,16 @@
 mode: agent
 ---
 - Go to the URL you are given
+- Explore the website's key features and functionalities
+- Identify key functionalities to test based on the website's features
+- Implement Playwright TypeScript tests using @playwright/test
+- Use Playwright's best practices including role-based locators, auto-retrying assertions, and no added timeouts unless necessary
+- Save generated test file in the tests directory
+- Execute the test file and iterate until the test passes
+- Include appropriate assertions to verify expected behavior
+- Structure tests properly with descriptive titles and comments
+- Implement a page object model
+- Follow DRY principles
+- Observe and generate tests using the site's network calls and responses
+- Observe and generate tests using the site's events in the data layer
+- Generate accessibility tests
