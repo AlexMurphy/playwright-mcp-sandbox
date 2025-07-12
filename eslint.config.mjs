@@ -2,7 +2,7 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
-import playwright from 'eslint-plugin-playwright';
+import playwright from "eslint-plugin-playwright";
 
 export default [
   js.configs.recommended,
@@ -13,27 +13,30 @@ export default [
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.browser
-      }
+        ...globals.browser,
+      },
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-      "@typescript-eslint/no-explicit-any": "warn"
-    }
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
   },
   {
     files: ["tests/**/*.{js,ts}"],
     plugins: {
-      playwright
+      playwright,
     },
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.browser
-      }
+        ...globals.browser,
+      },
     },
     rules: {
       ...playwright.configs.recommended.rules,
-    }
-  }
+    },
+  },
 ];

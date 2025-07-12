@@ -5,7 +5,9 @@ This comprehensive test suite covers the Omaze UK website (https://omaze.com) fu
 ## Test Files Overview
 
 ### 1. `omaze-comprehensive.spec.ts`
+
 Main comprehensive test suite covering:
+
 - Homepage functionality and house draw information
 - Navigation to entry page and entry methods
 - Subscription and pricing verification
@@ -20,7 +22,9 @@ Main comprehensive test suite covering:
 - Mobile responsiveness basics
 
 ### 2. `user-journey.spec.ts`
+
 Focused user journey tests covering:
+
 - Complete entry flows (single purchase, subscription, postal)
 - Navigation flows between main sections
 - House tour and gallery interactions
@@ -29,7 +33,9 @@ Focused user journey tests covering:
 - Footer links comprehensive testing
 
 ### 3. `accessibility-performance.spec.ts`
+
 Accessibility and performance focused tests:
+
 - Page titles and meta information
 - Heading hierarchy structure
 - Navigation accessibility
@@ -44,7 +50,9 @@ Accessibility and performance focused tests:
 - Color contrast and visual accessibility
 
 ### 4. `edge-cases.spec.ts`
+
 Edge cases and error handling tests:
+
 - Network interruption handling
 - Rapid user interactions
 - Cookie acceptance variations
@@ -63,10 +71,12 @@ Edge cases and error handling tests:
 ## Running the Tests
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - npm or pnpm package manager
 
 ### Installation
+
 ```bash
 # Install dependencies
 pnpm install
@@ -100,11 +110,13 @@ npx playwright test --project="Mobile Chrome"
 ### Test Reports
 
 After running tests, you can view the HTML report:
+
 ```bash
 npx playwright show-report
 ```
 
 Test artifacts are saved in:
+
 - `test-results/` - Screenshots, videos, traces
 - `playwright-report/` - HTML test report
 - `tests/screenshots/` - Custom accessibility screenshots
@@ -123,6 +135,7 @@ The tests are configured in `playwright.config.ts` with:
 ## Key Test Features
 
 ### Comprehensive Coverage
+
 - ✅ Main user journeys (browse, enter draw, subscribe)
 - ✅ Navigation and routing
 - ✅ Form interactions and validation
@@ -132,6 +145,7 @@ The tests are configured in `playwright.config.ts` with:
 - ✅ Error handling and edge cases
 
 ### Real User Scenarios
+
 - House draw entry process
 - Subscription management
 - Charity information verification
@@ -140,11 +154,14 @@ The tests are configured in `playwright.config.ts` with:
 - FAQ content accessibility
 
 ### Cross-Browser Testing
+
 Tests run across multiple browsers and viewports to ensure compatibility:
+
 - Desktop: Chrome, Firefox, Safari, Edge
 - Mobile: Chrome on Pixel 5, Safari on iPhone 12
 
 ### Accessibility Testing
+
 - ARIA landmarks and roles
 - Keyboard navigation
 - Screen reader compatibility
@@ -154,19 +171,23 @@ Tests run across multiple browsers and viewports to ensure compatibility:
 ## Maintenance
 
 ### Updating Tests
+
 When the website changes:
+
 1. Update selectors in test files
 2. Verify expected text content matches current site
 3. Update pricing and entry information as needed
 4. Check for new features or flows to test
 
 ### Adding New Tests
+
 1. Follow existing file structure and naming conventions
 2. Use descriptive test names and comments
 3. Group related tests in appropriate describe blocks
 4. Include both positive and negative test cases
 
 ### Test Data Management
+
 - Use dynamic selectors where possible
 - Extract reusable test data to constants
 - Update charity and pricing information as campaigns change
@@ -176,16 +197,19 @@ When the website changes:
 ### Common Issues
 
 **Tests timing out:**
+
 - Increase timeout values in config
 - Check network connectivity
 - Verify website is accessible
 
 **Element not found:**
+
 - Update selectors if website structure changed
 - Add wait conditions for dynamic content
 - Check for cookie banners or popups
 
 **Mobile tests failing:**
+
 - Verify mobile-specific selectors
 - Check viewport-dependent functionality
 - Test on actual mobile devices if needed
@@ -200,6 +224,7 @@ When the website changes:
 ## Contributing
 
 When adding new tests:
+
 1. Follow the existing test structure
 2. Include comprehensive assertions
 3. Test both happy path and error scenarios
