@@ -1,6 +1,6 @@
 import { chromium, FullConfig } from '@playwright/test';
 
-export default async function globalSetup(config: FullConfig) {
+export default async function globalSetup(_config: FullConfig) {
   // Launch browser and create a new page
   const browser = await chromium.launch();
   const page = await browser.newPage();
@@ -8,7 +8,7 @@ export default async function globalSetup(config: FullConfig) {
   try {
     // Navigate to the site to check if it's accessible
     await page.goto('https://omaze.co.uk', { 
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
       timeout: 30000 
     });
     
@@ -30,7 +30,7 @@ export default async function globalSetup(config: FullConfig) {
           await page.waitForTimeout(1000);
           break;
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }
@@ -40,8 +40,8 @@ export default async function globalSetup(config: FullConfig) {
     // Store any global state if needed
     // await page.context().storageState({ path: 'storage-state.json' });
     
-  } catch (error) {
-    console.log('⚠️ Global setup warning:', error.message);
+  } catch {
+    console.log('⚠️ Global setup warning: Site may be temporarily unavailable');
     // Don't fail the entire test suite if the site is temporarily unavailable
   } finally {
     await browser.close();

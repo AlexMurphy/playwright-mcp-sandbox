@@ -60,7 +60,7 @@ export class HomePage {
           await element.click({ timeout: 5000 });
           return;
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }
@@ -86,7 +86,7 @@ export class HomePage {
           await element.click({ timeout: 5000 });
           return;
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }
@@ -117,7 +117,7 @@ export class HomePage {
           await element.click({ timeout: 5000 });
           return;
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }
@@ -217,7 +217,7 @@ export class HomePage {
           await this.page.waitForTimeout(1000);
           break;
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }

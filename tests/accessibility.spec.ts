@@ -174,8 +174,8 @@ test.describe('Omaze UK - Accessibility Tests', () => {
       
       // Check first tab has proper attributes
       const firstTab = tabs.first();
-      const ariaSelected = await firstTab.getAttribute('aria-selected');
-      expect(ariaSelected).toBeTruthy();
+      const ariaSelected = firstTab;
+      await expect(ariaSelected).toHaveAttribute('aria-selected', );
     });
 
     await test.step('Test tab navigation with keyboard', async () => {
@@ -288,7 +288,6 @@ test.describe('Omaze UK - Accessibility Tests', () => {
     await test.step('Test mobile touch targets', async () => {
       // Verify interactive elements are large enough for touch
       const buttons = page.getByRole('button');
-      const links = page.getByRole('link');
       
       // Check first few buttons have adequate size
       for (let i = 0; i < Math.min(5, await buttons.count()); i++) {

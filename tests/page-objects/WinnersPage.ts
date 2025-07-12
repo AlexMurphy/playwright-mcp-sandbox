@@ -92,7 +92,7 @@ export class WinnersPage {
     await this.navigateCarousel(carouselIndex, 'next');
     await this.page.waitForTimeout(1000); // Wait for transition
     
-    const newSlide = await carousel.locator('[class*="active"], [aria-current="true"]').first().textContent();
-    expect(newSlide).not.toBe(initialSlide);
+    const newSlide = carousel.locator('[class*="active"], [aria-current="true"]').first();
+    await expect(newSlide).not.toHaveText(initialSlide);
   }
 }

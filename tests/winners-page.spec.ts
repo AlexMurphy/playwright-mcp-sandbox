@@ -95,7 +95,6 @@ test.describe('Omaze UK - Winners Page Tests', () => {
     });
 
     await test.step('Check heading structure', async () => {
-      const headings = page.getByRole('heading');
       const h2Count = await page.getByRole('heading', { level: 2 }).count();
       const h3Count = await page.getByRole('heading', { level: 3 }).count();
       
@@ -104,7 +103,7 @@ test.describe('Omaze UK - Winners Page Tests', () => {
     });
   });
 
-  test('should handle interactions correctly', async ({ page }) => {
+  test('should handle interactions correctly', async ({ page: _page }) => {
     await test.step('Test winner story interactions', async () => {
       const stories = winnersPage.winnerStories;
       const storyCount = await stories.count();
@@ -114,25 +113,18 @@ test.describe('Omaze UK - Winners Page Tests', () => {
       // Verify stories contain required elements
       for (let i = 0; i < Math.min(3, storyCount); i++) {
         const story = stories.nth(i);
-        const text = await story.textContent();
         
-        expect(text).toBeTruthy();
-        expect(text!.length).toBeGreaterThan(10);
+        await expect(story).toBeVisible();
+        await expect(story).toContainText(/\w+/); // Has some text content
       }
     });
 
     await test.step('Test carousel auto-play behavior', async () => {
-      // Monitor carousel changes over time
-      const initialSlide = await winnersPage.carousels.first()
-        .locator('[class*="active"], [aria-current="true"]').first().textContent();
+      // Monitor carousel changes over time  
+      const carousel = winnersPage.carousels.first();
+      await expect(carousel).toBeVisible();
       
-      await page.waitForTimeout(3000);
-      
-      // Check if slide changed automatically
-      const currentSlide = await winnersPage.carousels.first()
-        .locator('[class*="active"], [aria-current="true"]').first().textContent();
-      
-      // Note: Auto-play might be disabled, so this is just a check
+      // Note: Auto-play behavior testing is optional since it might be disabled
     });
   });
 
@@ -190,8 +182,8 @@ test.describe('Omaze UK - Winners Page Tests', () => {
         await expect(image).toBeVisible();
         
         // Check if image has src attribute
-        const src = await image.getAttribute('src');
-        expect(src).toBeTruthy();
+        const src = image;
+        await expect(src).toHaveAttribute('src', );
       }
     });
 

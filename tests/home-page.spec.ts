@@ -10,7 +10,7 @@ test.describe('Omaze UK - Home Page Tests', () => {
     await homePage.acceptCookies();
   });
 
-  test('should load home page correctly', async ({ page }) => {
+  test('should load home page correctly', async ({ page: _page }) => {
     await test.step('Verify page loads with essential elements', async () => {
       await homePage.verifyPageLoad();
     });
@@ -24,7 +24,7 @@ test.describe('Omaze UK - Home Page Tests', () => {
     });
   });
 
-  test('should display correct navigation elements', async ({ page }) => {
+  test('should display correct navigation elements', async ({ page: _page }) => {
     await test.step('Verify main navigation links are present', async () => {
       await homePage.verifyNavigationLinks();
     });

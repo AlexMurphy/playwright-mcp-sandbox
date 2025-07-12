@@ -52,7 +52,7 @@ test.describe('Omaze UK - Entry Flow Tests', () => {
     });
   });
 
-  test('should display correct pricing information', async ({ page }) => {
+  test('should display correct pricing information', async ({ page: _page }) => {
     await test.step('Navigate to entry page and verify pricing', async () => {
       await homePage.clickEnterNow();
       await entryPage.verifyPageLoad();
