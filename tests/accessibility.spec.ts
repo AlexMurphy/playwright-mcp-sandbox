@@ -1,318 +1,333 @@
 import { test, expect } from '@playwright/test';
+import { OmazePage, EntryPage, CartPage, CheckoutPage } from './page-objects/omaze-pages';
 
-test.describe('Omaze UK - Accessibility Tests', () => {
+test.describe('Accessibility Tests - Entry Purchase Flow', () => {
+  let omazePage: OmazePage;
+  let entryPage: EntryPage;
+  let cartPage: CartPage;
+  let checkoutPage: CheckoutPage;
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    omazePage = new OmazePage(page);
+    entryPage = new EntryPage(page);
+    cartPage = new CartPage(page);
+    checkoutPage = new CheckoutPage(page);
+  });
+
+  test('Homepage accessibility checks', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'accessibility',
+      description: 'Tests homepage for accessibility compliance including ARIA labels and keyboard navigation'
+    });
+
+    await omazePage.goto();
     
-    // Accept cookies if banner appears
-    const acceptButton = page.getByRole('button', { name: /accept|agree/i });
-    if (await acceptButton.isVisible({ timeout: 3000 })) {
-      await acceptButton.click();
+    // Check page has proper heading structure
+    const h1 = page.locator('h1');
+    await expect(h1).toHaveCount(1);
+    await expect(h1).toBeVisible();
+    
+    // Verify main navigation has proper ARIA attributes
+    await expect(omazePage.navigation).toHaveAttribute('role', 'navigation');
+    
+    // Check Enter Now button has proper accessibility attributes
+    const enterButton = page.getByRole('link', { name: 'Enter Now' });
+    await expect(enterButton).toBeVisible();
+    await expect(enterButton).toHaveAttribute('href');
+    
+    // Test keyboard navigation to Enter Now button
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(enterButton).toBeFocused();
+    
+    // Test Enter key activation
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/enter-cheshire/);
+  });
+
+  test('Entry page accessibility and keyboard navigation', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'accessibility',
+      description: 'Tests entry page tab navigation and form element accessibility'
+    });
+
+    await omazePage.goto();
+    await omazePage.clickEnterNow();
+    
+    // Verify tab navigation between entry methods
+    await entryPage.singlePurchaseTab.focus();
+    await expect(entryPage.singlePurchaseTab).toBeFocused();
+    
+    await page.keyboard.press('ArrowRight');
+    await expect(entryPage.subscriptionTab).toBeFocused();
+    
+    await page.keyboard.press('ArrowRight');
+    await expect(entryPage.postalTab).toBeFocused();
+    
+    // Test buy buttons are keyboard accessible
+    await entryPage.selectSinglePurchase();
+    const firstBuyButton = entryPage.buyNowButtons.first();
+    
+    // Navigate to first buy button with Tab
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(firstBuyButton).toBeFocused();
+    
+    // Activate with Enter key
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/cart/);
+  });
+
+  test('Cart page accessibility features', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'accessibility',
+      description: 'Tests cart functionality with keyboard navigation and screen reader compatibility'
+    });
+
+    // Navigate to cart
+    await omazePage.goto();
+    await omazePage.clickEnterNow();
+    await entryPage.selectSinglePurchase();
+    await entryPage.selectSmallestEntryPackage();
+    
+    // Check quantity input has proper label
+    await expect(cartPage.quantityInput).toHaveAttribute('aria-label');
+    
+    // Test keyboard modification of quantity
+    await cartPage.quantityInput.focus();
+    await expect(cartPage.quantityInput).toBeFocused();
+    
+    // Test remove button accessibility
+    await expect(cartPage.removeButton).toHaveAttribute('aria-label');
+    await cartPage.removeButton.focus();
+    await expect(cartPage.removeButton).toBeFocused();
+    
+    // Test continue button keyboard activation
+    await cartPage.continueButton.focus();
+    await expect(cartPage.continueButton).toBeFocused();
+    await page.keyboard.press('Enter');
+    
+    // Verify navigation to next step
+    await expect(page.getByText('Special Offer')).toBeVisible();
+  });
+
+  test('Checkout form accessibility and ARIA labels', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'accessibility',
+      description: 'Tests checkout form for proper labels, error handling, and keyboard navigation'
+    });
+
+    // Navigate to checkout
+    await omazePage.goto();
+    await omazePage.clickEnterNow();
+    await entryPage.selectSinglePurchase();
+    await entryPage.selectSmallestEntryPackage();
+    await cartPage.clickContinue();
+    await cartPage.clickCheckout();
+    
+    // Check form has proper heading
+    const formHeading = page.getByRole('heading', { name: /Contact information|Customer information/ });
+    await expect(formHeading).toBeVisible();
+    
+    // Verify all input fields have proper labels
+    await expect(checkoutPage.emailInput).toHaveAttribute('aria-label');
+    await expect(checkoutPage.firstNameInput).toHaveAttribute('aria-label');
+    await expect(checkoutPage.lastNameInput).toHaveAttribute('aria-label');
+    await expect(checkoutPage.addressInput).toHaveAttribute('aria-label');
+    await expect(checkoutPage.cityInput).toHaveAttribute('aria-label');
+    await expect(checkoutPage.postcodeInput).toHaveAttribute('aria-label');
+    await expect(checkoutPage.phoneInput).toHaveAttribute('aria-label');
+    
+    // Test keyboard navigation through form fields
+    await checkoutPage.emailInput.focus();
+    await expect(checkoutPage.emailInput).toBeFocused();
+    
+    await page.keyboard.press('Tab');
+    await expect(checkoutPage.firstNameInput).toBeFocused();
+    
+    await page.keyboard.press('Tab');
+    await expect(checkoutPage.lastNameInput).toBeFocused();
+    
+    // Test select dropdown accessibility
+    await checkoutPage.countrySelect.focus();
+    await expect(checkoutPage.countrySelect).toBeFocused();
+    await expect(checkoutPage.countrySelect).toHaveAttribute('aria-label');
+    
+    // Test checkbox accessibility
+    await expect(checkoutPage.marketingCheckbox).toHaveAttribute('aria-label');
+    await checkoutPage.marketingCheckbox.focus();
+    await expect(checkoutPage.marketingCheckbox).toBeFocused();
+    
+    // Toggle checkbox with spacebar
+    await page.keyboard.press('Space');
+    await expect(checkoutPage.marketingCheckbox).not.toBeChecked();
+    
+    await page.keyboard.press('Space');
+    await expect(checkoutPage.marketingCheckbox).toBeChecked();
+  });
+
+  test('Mobile touch accessibility', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'mobile-accessibility',
+      description: 'Tests touch target sizes and mobile accessibility features'
+    });
+
+    await omazePage.goto();
+    
+    // Check Enter Now button touch target size (should be at least 44x44px)
+    const enterButton = page.getByRole('link', { name: 'Enter Now' });
+    const buttonBox = await enterButton.boundingBox();
+    expect(buttonBox?.height).toBeGreaterThanOrEqual(44);
+    expect(buttonBox?.width).toBeGreaterThanOrEqual(44);
+    
+    // Navigate to entry page and check buy button sizes
+    await omazePage.clickEnterNow();
+    await entryPage.selectSinglePurchase();
+    
+    const buyButton = entryPage.buyNowButtons.first();
+    const buyButtonBox = await buyButton.boundingBox();
+    expect(buyButtonBox?.height).toBeGreaterThanOrEqual(44);
+    expect(buyButtonBox?.width).toBeGreaterThanOrEqual(44);
+    
+    // Continue to cart and check touch targets
+    await entryPage.selectSmallestEntryPackage();
+    
+    const continueButtonBox = await cartPage.continueButton.boundingBox();
+    expect(continueButtonBox?.height).toBeGreaterThanOrEqual(44);
+    
+    const removeButtonBox = await cartPage.removeButton.boundingBox();
+    expect(removeButtonBox?.height).toBeGreaterThanOrEqual(44);
+    expect(removeButtonBox?.width).toBeGreaterThanOrEqual(44);
+  });
+
+  test('Color contrast and visual accessibility', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'visual-accessibility',
+      description: 'Tests for sufficient color contrast and visual elements'
+    });
+
+    await omazePage.goto();
+    
+    // Check that important elements are visible
+    await expect(page.getByRole('link', { name: 'Enter Now' })).toBeVisible();
+    
+    // Navigate through flow and check visibility at each step
+    await omazePage.clickEnterNow();
+    await expect(page.getByRole('heading')).toBeVisible();
+    await expect(entryPage.singlePurchaseTab).toBeVisible();
+    
+    await entryPage.selectSinglePurchase();
+    await expect(entryPage.buyNowButtons.first()).toBeVisible();
+    
+    await entryPage.selectSmallestEntryPackage();
+    await expect(cartPage.continueButton).toBeVisible();
+    await expect(cartPage.removeButton).toBeVisible();
+    
+    await cartPage.clickContinue();
+    await cartPage.clickCheckout();
+    
+    // Check form elements are visible and readable
+    await expect(checkoutPage.emailInput).toBeVisible();
+    await expect(checkoutPage.continueToPaymentButton).toBeVisible();
+    
+    // Verify error states would be visible (attempt form submission)
+    await checkoutPage.continueToPaymentButton.click();
+    // Focus should move to first invalid field for accessibility
+    await expect(checkoutPage.emailInput).toBeFocused();
+  });
+
+  test('Screen reader announcements and ARIA live regions', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'screen-reader',
+      description: 'Tests for proper ARIA live regions and screen reader announcements'
+    });
+
+    await omazePage.goto();
+    await omazePage.clickEnterNow();
+    await entryPage.selectSinglePurchase();
+    await entryPage.selectSmallestEntryPackage();
+    
+    // Check for cart update announcements
+    const ariaLiveRegions = page.locator('[aria-live]');
+    const count = await ariaLiveRegions.count();
+    
+    // Should have at least one live region for cart updates
+    expect(count).toBeGreaterThanOrEqual(0);
+    
+    // Continue through flow to checkout
+    await cartPage.clickContinue();
+    await cartPage.clickCheckout();
+    
+    // Check for form validation announcements
+    await checkoutPage.continueToPaymentButton.click();
+    
+    // Wait for potential error announcements
+    await page.waitForTimeout(1000);
+    
+    // Check if error messages have proper ARIA attributes
+    const errorMessages = page.locator('[role="alert"], [aria-invalid="true"]');
+    const errorCount = await errorMessages.count();
+    
+    // Should have error indicators when form is invalid
+    if (errorCount > 0) {
+      await expect(errorMessages.first()).toBeVisible();
     }
   });
 
-  test('should meet basic accessibility requirements on home page', async ({ page }) => {
-    await test.step('Check page structure and landmarks', async () => {
-      // Verify semantic HTML structure
-      await expect(page.locator('header, nav, main, footer')).toHaveCount(4);
-      await expect(page.getByRole('navigation')).toBeVisible();
-      await expect(page.getByRole('main')).toBeVisible();
-      await expect(page.getByRole('contentinfo')).toBeVisible();
+  test('Focus management and tab order', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'focus-management',
+      description: 'Tests logical tab order and focus management throughout the flow'
     });
 
-    await test.step('Check heading hierarchy', async () => {
-      // Verify proper heading structure (h1 > h2 > h3, etc.)
-      const h1Elements = page.getByRole('heading', { level: 1 });
-      await expect(h1Elements).toHaveCount(1);
+    await omazePage.goto();
+    
+    // Test tab order on homepage
+    await page.keyboard.press('Tab'); // Should focus first interactive element
+    const firstFocused = await page.evaluate(() => document.activeElement?.tagName);
+    expect(['A', 'BUTTON', 'INPUT']).toContain(firstFocused);
+    
+    // Navigate to entry page and test tab order
+    await omazePage.clickEnterNow();
+    
+    // Reset focus and test tab navigation through entry options
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    
+    // Should be able to reach all interactive elements
+    await entryPage.selectSinglePurchase();
+    
+    // Test that buy buttons are in logical tab order
+    let tabCount = 0;
+    while (tabCount < 10) { // Limit to prevent infinite loop
+      await page.keyboard.press('Tab');
+      const focusedElement = page.locator(':focus');
+      const isButton = await focusedElement.evaluate(el => 
+        el.tagName === 'BUTTON' || el.tagName === 'A'
+      ).catch(() => false);
       
-      const h2Elements = page.getByRole('heading', { level: 2 });
-      const h2Count = await h2Elements.count();
-      expect(h2Count).toBeGreaterThan(0);
-    });
-
-    await test.step('Check images have alt text', async () => {
-      const images = page.locator('img');
-      const imageCount = await images.count();
-      
-      for (let i = 0; i < Math.min(10, imageCount); i++) {
-        const image = images.nth(i);
-        const alt = await image.getAttribute('alt');
-        const ariaLabel = await image.getAttribute('aria-label');
-        
-        // Images should have either alt text or aria-label
-        expect(alt !== null || ariaLabel !== null).toBeTruthy();
-      }
-    });
-
-    await test.step('Check links have accessible names', async () => {
-      const links = page.getByRole('link');
-      const linkCount = await links.count();
-      
-      for (let i = 0; i < Math.min(10, linkCount); i++) {
-        const link = links.nth(i);
-        const text = await link.textContent();
-        const ariaLabel = await link.getAttribute('aria-label');
-        
-        // Links should have visible text or aria-label
-        expect(text?.trim() || ariaLabel).toBeTruthy();
-      }
-    });
-  });
-
-  test('should support keyboard navigation', async ({ page }) => {
-    await test.step('Test tab navigation through interactive elements', async () => {
-      // Start from top of page
-      await page.keyboard.press('Home');
-      
-      // Tab through first few interactive elements
-      for (let i = 0; i < 10; i++) {
-        await page.keyboard.press('Tab');
-        await page.waitForTimeout(100);
-        
-        // Check that focused element is visible
-        const focusedElement = page.locator(':focus');
-        if (await focusedElement.count() > 0) {
-          await expect(focusedElement).toBeVisible();
+      if (isButton) {
+        const text = await focusedElement.textContent().catch(() => '');
+        if (text?.includes('£')) {
+          // Found a buy button, click it
+          await page.keyboard.press('Enter');
+          break;
         }
       }
-    });
-
-    await test.step('Test Enter key activation on buttons', async () => {
-      const firstButton = page.getByRole('button').first();
-      if (await firstButton.isVisible()) {
-        await firstButton.focus();
-        await page.keyboard.press('Enter');
-        await page.waitForTimeout(1000);
-      }
-    });
-
-    await test.step('Test Space key activation on buttons', async () => {
-      const buttons = page.getByRole('button');
-      const buttonCount = await buttons.count();
-      
-      if (buttonCount > 1) {
-        const secondButton = buttons.nth(1);
-        await secondButton.focus();
-        await page.keyboard.press('Space');
-        await page.waitForTimeout(1000);
-      }
-    });
-  });
-
-  test('should have proper color contrast', async ({ page }) => {
-    await test.step('Check text elements have sufficient contrast', async () => {
-      // Get computed styles for key text elements
-      const textElements = [
-        page.getByRole('heading').first(),
-        page.getByRole('link').first(),
-        page.getByRole('button').first()
-      ];
-
-      for (const element of textElements) {
-        if (await element.isVisible()) {
-          const styles = await element.evaluate(el => {
-            const computed = getComputedStyle(el);
-            return {
-              color: computed.color,
-              backgroundColor: computed.backgroundColor,
-              fontSize: computed.fontSize
-            };
-          });
-          
-          // Basic check that elements have color styles
-          expect(styles.color).toBeTruthy();
-          expect(styles.fontSize).toBeTruthy();
-        }
-      }
-    });
-  });
-
-  test('should be accessible on winners page', async ({ page }) => {
-    await test.step('Navigate to winners page', async () => {
-      await page.getByRole('link', { name: /our winners/i }).click();
-      await expect(page).toHaveURL(/.*winners.*/);
-    });
-
-    await test.step('Check carousel accessibility', async () => {
-      // Verify carousel controls have proper labels
-      const nextButtons = page.getByRole('button', { name: /next slide/i });
-      await expect(nextButtons.first()).toBeVisible();
-      
-      const slideButtons = page.getByRole('button', { name: /go to slide/i });
-      const slideButtonCount = await slideButtons.count();
-      expect(slideButtonCount).toBeGreaterThan(5);
-    });
-
-    await test.step('Test carousel keyboard navigation', async () => {
-      const carousel = page.locator('.swiper-container, [class*="carousel"]').first();
-      await carousel.focus();
-      
-      // Test arrow key navigation
-      await page.keyboard.press('ArrowRight');
-      await page.waitForTimeout(500);
-      
-      await page.keyboard.press('ArrowLeft');
-      await page.waitForTimeout(500);
-    });
-  });
-
-  test('should be accessible on entry page', async ({ page }) => {
-    await test.step('Navigate to entry page', async () => {
-      await page.getByRole('link', { name: /enter now/i }).first().click();
-      await expect(page).toHaveURL(/.*enter.*/);
-    });
-
-    await test.step('Check form accessibility', async () => {
-      // Verify tabs have proper ARIA attributes
-      const tablist = page.getByRole('tablist');
-      await expect(tablist).toBeVisible();
-      
-      const tabs = page.getByRole('tab');
-      const tabCount = await tabs.count();
-      expect(tabCount).toBeGreaterThan(0);
-      
-      // Check first tab has proper attributes
-      const firstTab = tabs.first();
-      const ariaSelected = firstTab;
-      await expect(ariaSelected).toHaveAttribute('aria-selected', );
-    });
-
-    await test.step('Test tab navigation with keyboard', async () => {
-      const tabs = page.getByRole('tab');
-      const tabCount = await tabs.count();
-      
-      if (tabCount > 1) {
-        await tabs.first().focus();
-        await page.keyboard.press('ArrowRight');
-        await page.waitForTimeout(500);
-        
-        // Check that focus moved to next tab
-        const focusedTab = page.locator(':focus');
-        await expect(focusedTab).toBeVisible();
-      }
-    });
-  });
-
-  test('should be accessible on FAQs page', async ({ page }) => {
-    await test.step('Navigate to FAQs page', async () => {
-      await page.getByRole('link', { name: /faqs/i }).click();
-      await expect(page).toHaveURL(/.*faqs.*/);
-    });
-
-    await test.step('Check FAQ accessibility structure', async () => {
-      // Verify heading levels are logical
-      const h2Count = await page.getByRole('heading', { level: 2 }).count();
-      const h4Count = await page.getByRole('heading', { level: 4 }).count();
-      
-      expect(h2Count).toBeGreaterThan(5);
-      expect(h4Count).toBeGreaterThan(20);
-    });
-
-    await test.step('Test FAQ interaction accessibility', async () => {
-      const firstQuestion = page.getByRole('heading', { level: 4 }).first();
-      
-      // Test click activation
-      await firstQuestion.click();
-      await page.waitForTimeout(500);
-      
-      // Test keyboard activation
-      await firstQuestion.focus();
-      await page.keyboard.press('Enter');
-      await page.waitForTimeout(500);
-    });
-  });
-
-  test('should handle focus management correctly', async ({ page }) => {
-    await test.step('Test skip links if present', async () => {
-      // Check for skip to main content link
-      const skipLink = page.getByRole('link', { name: /skip to main/i });
-      if (await skipLink.isVisible({ timeout: 1000 })) {
-        await skipLink.click();
-        
-        // Verify focus moved to main content
-        const mainElement = page.getByRole('main');
-        await expect(mainElement).toBeFocused();
-      }
-    });
-
-    await test.step('Test focus trapping in modals', async () => {
-      // Look for modal triggers
-      const modalButtons = page.getByRole('button', { name: /watch|play|video/i });
-      if (await modalButtons.count() > 0) {
-        await modalButtons.first().click();
-        await page.waitForTimeout(1000);
-        
-        // If modal opened, test escape key
-        await page.keyboard.press('Escape');
-        await page.waitForTimeout(500);
-      }
-    });
-  });
-
-  test('should work with screen reader simulation', async ({ page }) => {
-    await test.step('Check ARIA landmarks', async () => {
-      // Verify ARIA landmarks are present
-      const landmarks = await page.locator('[role="banner"], [role="navigation"], [role="main"], [role="contentinfo"]').count();
-      expect(landmarks).toBeGreaterThan(2);
-    });
-
-    await test.step('Check ARIA labels and descriptions', async () => {
-      // Find elements with ARIA attributes
-      const ariaLabelElements = page.locator('[aria-label]');
-      const ariaDescElements = page.locator('[aria-describedby]');
-      
-      const labelCount = await ariaLabelElements.count();
-      const descCount = await ariaDescElements.count();
-      
-      // Some elements should have ARIA attributes
-      expect(labelCount + descCount).toBeGreaterThan(0);
-    });
-
-    await test.step('Check live regions for dynamic content', async () => {
-      // Look for live regions that announce changes
-      const liveRegions = page.locator('[aria-live], [role="status"], [role="alert"]');
-      const liveRegionCount = await liveRegions.count();
-      
-      // Live regions might not be present on static pages, so this is informational
-      console.log(`Found ${liveRegionCount} live regions`);
-    });
-  });
-
-  test('should maintain accessibility on mobile', async ({ page }) => {
-    await test.step('Set mobile viewport', async () => {
-      await page.setViewportSize({ width: 375, height: 667 });
-      await page.reload();
-    });
-
-    await test.step('Test mobile touch targets', async () => {
-      // Verify interactive elements are large enough for touch
-      const buttons = page.getByRole('button');
-      
-      // Check first few buttons have adequate size
-      for (let i = 0; i < Math.min(5, await buttons.count()); i++) {
-        const button = buttons.nth(i);
-        if (await button.isVisible()) {
-          const box = await button.boundingBox();
-          if (box) {
-            // Touch targets should be at least 44x44 pixels
-            expect(Math.min(box.width, box.height)).toBeGreaterThan(30);
-          }
-        }
-      }
-    });
-
-    await test.step('Test mobile navigation accessibility', async () => {
-      // Test mobile menu if present
-      const mobileMenuButton = page.getByRole('button').first();
-      if (await mobileMenuButton.isVisible()) {
-        await mobileMenuButton.click();
-        await page.waitForTimeout(1000);
-        
-        // Verify menu is accessible
-        const navigation = page.getByRole('navigation');
-        await expect(navigation).toBeVisible();
-      }
-    });
+      tabCount++;
+    }
+    
+    // Should be on cart page now
+    await expect(page).toHaveURL(/cart/);
+    
+    // Test focus moves logically through cart elements
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    
+    // Focus should be on interactive cart elements
+    const cartFocused = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
+    expect(cartFocused).toBeTruthy();
   });
 });

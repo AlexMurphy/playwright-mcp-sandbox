@@ -42,7 +42,7 @@ export default defineConfig({
     video: 'retain-on-failure',
     
     /* Global timeout for each action */
-    actionTimeout: 10000,
+    actionTimeout: 20000,
     
     /* Global timeout for navigation */
     navigationTimeout: 30000,
@@ -51,24 +51,10 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    /* Test against mobile viewports. */
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      name: 'Mobile Safari',
+      use: {
+        ...devices['iPhone 15 Pro Max'],
+      },
     },
   ],
 

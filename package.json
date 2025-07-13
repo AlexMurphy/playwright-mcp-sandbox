@@ -29,6 +29,7 @@
     "typescript-eslint": "^8.36.0"
   },
   "dependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@playwright/mcp": "0.0.5"
   }
 }
